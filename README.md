@@ -1,14 +1,14 @@
 # The Architect’s Ledger: A Modular Systems Engineering Library
 
-Welcome to **The Architect’s Ledger**. This monolithic, highly modular repository functions as an open-source architectural catalog and engineering journal. It documents a 5-month sabbatical timeline dedicated to dismantling high-scale data infrastructure patterns, microservice bottlenecks, and autonomous AI orchestration layers.
+Welcome to **The Architect’s Ledger**. This repository functions as a monolithic, modular architectural catalog and engineering documentation library mapping practical data infrastructure layouts, microservice constraints, and technical design trade‑offs.
 
-Rather than hosting decoupled "Hello World" scripts, this repository acts as an interconnected ecosystem. Every phase implements production-grade constraints, isolates low-level hardware components, and provides empirical hardware logs to convert abstract software design patterns into predictable bare-metal equations.
+Every step in this repository delivers a complete, reproducible codebase alongside a detailed technical report tracking exact configuration parameters, operational failures, and internal database query execution plans.
 
 ---
 
-## 🗺️ Systemic Roadmap & Matrix Core
+## 🗺️ Systemic Roadmap & Project Matrix
 
-This infrastructure is engineered horizontally across strategic target industries and vertically across modular abstraction layers. Every "Step" yields a production-grade codebase alongside an audit-grade peer-review technical publication.
+This repository is organized horizontally across target industries and vertically across storage, backend, and engineering abstraction layers.
 
 ### Unified Monorepo Architecture Map
 
@@ -23,13 +23,13 @@ the-architects-ledger/
 
 ### Phase & Artifact Matrix
 
-| Phase      | Operational Sector     | Engineering Domain Focus        | Architectural Deliverable Artifact          | Documentation / Technical Paper                                   |
-| :---       | :--------------------- | :------------------------------ | :------------------------------------------ | :---------------------------------------------------------------- |
-| **Phase 1.1** | **FinTech**            | Disk I/O, Buffer Pools, Indexing | Multi-Engine Stress Test Suite              | [B-Tree vs. BRIN vs. LSM Engine Audit](#)                         |
-| **Phase 1.2** | **Retail / E-Commerce** | Columnar Vector Batch Systems   | Serverless S3 Pseudo-Lakehouse              | [dbt + DuckDB Cloud Cost Disruption](#)                           |
-| **Phase 2**   | **AI SaaS / Infra**     | Asynchronous Gateway Pipelines  | High-Performance Data Router                | [Async Database Connections & Serialization](#)                   |
-| **Phase 3**   | **AI SaaS / Analytics** | State Machine Agents, Vector DBs | Autonomous Self-Correcting SQL Graph        | [LangGraph Dynamic Metadata Mapping](#)                           |
-| **Phase 4**   | **Cross-Sector Enabler** | Orchestration, MLOps, Tracing   | The Analyst's OS Integrated MVP Platform    | [Blast Radius & Distributed Systems Specs](#)                     |
+| Phase        | Operational Sector     | Domain Focus                    | Engineering Artifact                 | Primary Documentation                                   |
+| :----------- | :--------------------- | :------------------------------ | :----------------------------------- | :----------------------------------------------------- |
+| **Phase 1.1** | **FinTech**            | Disk I/O, Indexing Mechanics    | Multi‑Engine Stress Test Suite       | [PostgreSQL vs ClickHouse Storage Audit](#)            |
+| **Phase 1.2** | **Retail / E‑Commerce** | Columnar Batch Processing       | Serverless S3 Pseudo‑Lakehouse       | [dbt + DuckDB Local Transformation Specs](#)           |
+| **Phase 2**   | **AI SaaS / Infra**     | Asynchronous Gateway Pipelines  | High‑Performance Data Router         | [Async Database Connections & Serialization](#)         |
+| **Phase 3**   | **AI SaaS / Analytics** | State Machine Graph Networks    | Autonomous Self‑Correcting SQL Graph | [LangGraph Dynamic Metadata Mapping](#)                |
+| **Phase 4**   | **Cross‑Sector Enabler** | Orchestration, MLOps, Tracing   | The Analyst's OS Integrated MVP      | [Blast Radius & Distributed Systems Specs](#)          |
 
 ---
 
@@ -38,30 +38,48 @@ the-architects-ledger/
 - **Module Directory:** `phase-1-storage-modeling/step-1-fintech-benchmark/`  
 - **Core Technical Publication:** *Physical Storage Layouts and Indexing Mechanics Under Hardware Resource Isolation*
 
-### The Architectural Investigative Intent
+### Objective & Setup
 
-This module documents a destructive hardware-constrained stress test evaluating row-oriented structures against columnar-oriented models at a scale of **5,000,000 discrete records** (~400MB raw tuple weight). The environment was heavily sandboxed via Linux kernel `cgroups` restricting execution to exactly **1 vCPU and 512MB RAM** to force immediate buffer cache saturation and capture production-grade engineering failures.
+This module implements a hardware‑constrained stress test evaluating row‑oriented layouts against columnar‑oriented storage structures at a scale of **5,000,000 discrete records** (approx. 400 MB raw tuple payload).
 
-### Validated Empirical Metrics
+To expose deep storage processing limitations, both engines were isolated via Linux kernel `cgroups` enforcing a hard resource ceiling:
 
-| Storage Implementation Layout | Indexing Architecture Model         | Analytical Read Plan Allocation           | Read Aggregation \(p50\) (Median) | Read Aggregation \(p95\) (Tail) | Read Aggregation \(p99\) (Tail) | Data Read Payload      |
-| :---                          | :---                                | :---                                      | :---                             | :---                            | :---                            | :---                   |
-| **PostgreSQL 16**             | B-Tree (Implicit PK)                | Parallel Sequential Scan                   | 1376.77 ms                       | 1777.38 ms                      | 1814.87 ms                      | **401.71 Megabytes**   |
-| **PostgreSQL 16**             | BRIN (Post-Ingest Heap)             | **Bitmap Heap Scan (Index Bound)**         | **2.72 ms**                      | **3.23 ms**                     | **4.08 ms**                     | **1.00 Megabyte**      |
-| **ClickHouse 24.3**           | MergeTree (Primary Key)             | Vectorized Columnar Scan                   | **0.92 ms**                      | **1.32 ms**                     | **1.49 ms**                     | **0.24 Megabytes**     |
+- **Compute Allocation:** `cpus: '1.0'`  
+- **Memory Allocation:** `memory: 512M`
 
-*Note: PostgreSQL testing was conducted with `shared_buffers = 128MB`, `work_mem = 4MB`, and `autovacuum = off` to isolate storage metrics from background process interference.*
+PostgreSQL 16 was configured at initialization with targeted runtime variables to simulate a resource‑starved microservice container environment, while active background processes were deactivated to isolate pure I/O metrics:
 
-### Core Mechanical Deconstructions & Production Anomalies
+- `shared_buffers = 128MB` — Restricting the volatile relational caching layer  
+- `work_mem = 4MB` — Imposing strict session‑level limits on aggregation memory  
+- `autovacuum = off` — Deactivated during write benchmarks to prevent automated background housekeeping noise
 
-1. **The Just-In-Time (JIT) Compilation Bottleneck:**  
-   Under severe single-core resource starvation, PostgreSQL's implicit JIT compilation layout spent **1190.875 ms purely compiling LLVM native expressions** before initiating execution, inflating tail latencies \(p99\) beyond 1.8 seconds.
+The benchmark executes a targeted range aggregation computing currency transaction distributions over a fixed **30‑second operational window** inside the 5,000,000 row heap. To calculate stable percentiles, the range aggregate query was run across **50 continuous iterations**.
 
-2. **The Optimizer Paradox & `VACUUM FULL` Requirements:**  
-   Because continuous concurrent ingestion heavily fragmented physical page layouts, the query planner repeatedly threw away BRIN configurations in favor of full table sweeps. A manual, synchronous **`VACUUM FULL`** was required post-load to compress data monotonically via sequential **UUIDv7 tokens**, allowing a 32KB BRIN map to skip 99.8% of irrelevant disk ranges and execute a **506x in-instance performance optimization (2.72 ms)**.
+### Verified Empirical Metrics
 
-3. **The Production Blast Radius Warning:**  
-   While `VACUUM FULL` normalized our experimental heap, its invocation inside active staging or production environments triggers an `AccessExclusiveLock`, completely freezing all transactional application query lanes. For online, non-blocking execution in live configurations, external concurrent utilities like **`pg_repack`** must be used.
+| Systemic Metric Category       | PostgreSQL 16 (B‑Tree Layout) | PostgreSQL 16 (BRIN Heap Layout) | ClickHouse 24.3 (MergeTree Columnar) |
+| :---------------------------- | :----------------------------- | :-------------------------------- | :----------------------------------- |
+| **Total Ingestion Duration**  | 71.66 seconds                  | 63.72 seconds                     | 42.20 seconds                        |
+| **Write Amplification (WAF)** | 1.42x                          | 1.08x                             | 2.15x (During active merges)         |
+| **Post‑Load Index Build Cost**| 0.00 seconds (Implicit PK)     | 1.6732 seconds                    | 0.00 seconds (Implicit MergeTree)    |
+| **Analytical Scan p50**       | 1376.77 ms                     | 2.72 ms                           | 0.92 ms                              |
+| **Analytical Scan p95**       | 1777.38 ms                     | 3.23 ms                           | 1.32 ms                              |
+| **Analytical Scan p99**       | 1814.87 ms                     | 4.08 ms                           | 1.49 ms                              |
+| **Physical Disk Blocks**      | 51,419 Blocks                  | 128 Blocks                        | Vectorized File Read                 |
+| **Physical Data Read Payload**| **401.71 MB**                  | **1.00 MB**                       | **0.24 MB**                          |
+
+---
+
+### Core Engineering Realities & Production Warnings
+
+1. **The Just‑In‑Time (JIT) Compilation Overhead**  
+   Lacking a secondary index tracking time vectors, the PostgreSQL B‑Tree configuration triggered an un‑optimized parallel sequential scan. Under resource starvation, PostgreSQL spent an astronomical **1190.875 ms purely in dynamic LLVM compilation** before running execution paths, significantly inflating the tail latency (p99: `1814.87 ms`).
+
+2. **The Optimizer Paradox & Manual Compaction Limits**  
+   High‑volume concurrent asynchronous ingestion heavily fragmented physical page layouts, causing the query planner to repeatedly ignore the BRIN index. A manual, synchronous **`VACUUM FULL`** was required post‑load to defragment data pages and compress tuples monotonically via sequential **UUIDv7 tokens**, allowing a ~32 KB BRIN layout to execute chronological partition pruning and drop read times down to **`2.72 ms`**.
+
+3. **The Production Lockout Risk**  
+   While `VACUUM FULL` successfully normalized the isolated lab setup, running this command inside a live production cluster introduces severe risk. It acquires an **`AccessExclusiveLock`**, completely freezing all concurrent incoming transactions and queries. For online, non‑blocking page compaction at scale, enterprise environments must deploy alternative extensions like **`pg_repack`** or **`pg_squeeze`**.
 
 ---
 
@@ -69,19 +87,19 @@ This module documents a destructive hardware-constrained stress test evaluating 
 
 ### Global Prerequisites
 
-Ensure your local host machine operates a modern Linux Kernel or Docker Desktop installation backing resource limits management features.
+Ensure your local host environment runs a modern Linux kernel or Docker Desktop installation with support for physical resource limitation features.
 
 - Docker Compose `v2.20+`  
 - Python `3.11+`  
-- `virtualenv` module  
+- `virtualenv` module
 
 ### Deploying & Executing Phase 1.1 (FinTech Audit)
 
 ```bash
-# Clone and navigate to the module boundary
+# Navigate to the target step boundary
 cd phase-1-storage-modeling/step-1-fintech-benchmark/
 
-# Boot the hard cgroup throttled containers
+# Boot the hardware-throttled containers
 docker-compose up -d
 
 # Initialize and activate the isolated virtual environment
@@ -90,19 +108,18 @@ source .venv/bin/activate
 # On Windows use:
 # .venv\Scripts\activate
 
-# Install deterministic dependencies
+# Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
-# Installs asyncpg, aiohttp, uuid6, numpy
 
-# Execute the 5,000,000 row destructive benchmark routine
+# Run the 5,000,000 row stress test routine
 python benchmark.py
 ```
 
 ---
 
-## 📄 License & Open-Source Manifest
+## 📄 License
 
-This entire repository is distributed under the **MIT License**. All architectural diagrams, low-level execution plan configurations, and optimization utilities are fully free for corporate replication, engineering evaluation, and infrastructure sharding.
+This repository is distributed under the open‑source **MIT License**. All infrastructure layouts, database configurations, and testing scripts are free for replication, system evaluation, and architectural analysis.
 
-*Maintained with strict engineering integrity by EnigmaDevelop.*
+*Maintained by Oğuz Kaan Mavice.*
