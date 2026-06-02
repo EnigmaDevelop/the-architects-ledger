@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: raw_lake
+    loader: parquet
+    meta:
+      external_location: "../data/raw/{identifier}"
+    tables:
+      - name: users
+        identifier: "users/*.parquet"
+      - name: products
+        identifier: "products/*.parquet"
+      - name: orders
+        identifier: "orders/*/*/*.parquet"

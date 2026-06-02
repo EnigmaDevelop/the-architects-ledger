@@ -1,0 +1,7 @@
+retail_lakehouse_profile:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../retail_lakehouse.db
+      threads: 4 # Leveraging multicore processing inside the container limit

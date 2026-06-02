@@ -1,0 +1,20 @@
+name: 'retail_lakehouse'
+version: '1.0.0'
+config-version: 2
+
+profile: 'retail_lakehouse_profile'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  retail_lakehouse:
+    staging:
+      +materialized: view # Staging layer should always be light views
+    marts:
+      +materialized: table # Analytical marts compiled to physical tables for fast dashboard reads
