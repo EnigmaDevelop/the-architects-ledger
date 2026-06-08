@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  fastapi-rest-bulk:
+    image: python:3.11-slim
+    container_name: gateway_fastapi_rest_bulk
+    volumes:
+      - .:/app
+      - ../../phase-1-storage-modeling/step-2-retail-lakehouse:/data_lake:ro
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    command: sh -c "pip install -r requirements.txt && uvicorn monolithic_bulk.gateway_rest_bulk:app --host 0.0.0.0 --port 8000 --workers 1"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+  grpc-protobuf-bulk:
+    image: python:3.11
+    container_name: gateway_grpc_protobuf_bulk
+    volumes:
+      - .:/app
+      - ../../phase-1-storage-modeling/step-2-retail-lakehouse:/data_lake:ro
+    working_dir: /app
+    ports:
+      - "50051:50051"
+    # Added in-container compilation loop before trigger execution path
+    command: sh -c "pip install -r requirements.txt && python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. proto/orders.proto && python monolithic_bulk/gateway_grpc_bulk.py"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+  fastapi-rest-stream:
+    image: python:3.11-slim
+    container_name: gateway_fastapi_rest_stream
+    volumes:
+      - .:/app
+      - ../../phase-1-storage-modeling/step-2-retail-lakehouse:/data_lake:ro
+    working_dir: /app
+    ports:
+      - "8001:8001"
+    command: sh -c "pip install -r requirements.txt && uvicorn streaming_pipeline.gateway_rest_stream:app --host 0.0.0.0 --port 8001 --workers 1"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+  grpc-protobuf-stream:
+    image: python:3.11
+    container_name: gateway_grpc_protobuf_stream
+    volumes:
+      - .:/app
+      - ../../phase-1-storage-modeling/step-2-retail-lakehouse:/data_lake:ro
+    working_dir: /app
+    ports:
+      - "50052:50052"
+    # Added in-container compilation loop before trigger execution path
+    command: sh -c "pip install -r requirements.txt && python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. proto/orders.proto && python streaming_pipeline/gateway_grpc_stream.py"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M

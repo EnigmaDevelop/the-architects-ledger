@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package orders;
+
+message OrderRequest {
+  int32 record_count = 1;
+}
+
+message OrderRow {
+  int32 order_id = 1;
+  int32 user_id = 2;
+  int32 product_id = 3;
+  int32 quantity = 4;
+  string order_date = 5;
+  string partition_year = 6;
+  string partition_month = 7;
+  double line_item_revenue = 8;
+}
+
+message OrderResponse {
+  repeated OrderRow orders = 1;
+}
+
+service OrderGateway {
+  // Phase 1: Monolithic Bulk Data Retrieval RPC (Memory Intensive)
+  rpc GetOrdersBulk (OrderRequest) returns (OrderResponse);
+
+  // Phase 2: High-Performance Server Streaming RPC (Memory Bounded)
+  rpc GetOrdersStream (OrderRequest) returns (stream OrderRow);
+}
