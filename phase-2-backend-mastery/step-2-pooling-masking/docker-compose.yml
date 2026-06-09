@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  transactional-postgres:
+    image: postgres:16-alpine
+    container_name: gateway_transactional_postgres
+    environment:
+      POSTGRES_USER: ledger_admin
+      POSTGRES_PASSWORD: secure_vault_password
+      POSTGRES_DB: core_transactional_db
+    ports:
+      - "5445:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledger_admin -d core_transactional_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pooled-gateway:
+    image: python:3.11-slim
+    container_name: gateway_pooled_masking
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8002:8002"
+    command: sh -c "pip install -r requirements.txt && uvicorn gateway_pooled:app --host 0.0.0.0 --port 8002 --workers 1"
+    depends_on:
+      transactional-postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
